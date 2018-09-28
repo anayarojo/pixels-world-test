@@ -71,8 +71,10 @@ var Entity = (function(props){
         // let childObj = iterationCopy(obj);
 
         let childObj = Object.assign({}, obj);
+        
         childObj.color = Object.assign({}, childObj.color);
         childObj.position = Object.assign({}, childObj.position);
+
         childObj.color = childObj.generation % 10 != 0 ? childObj.color : getRandomColor();
         childObj.generation++;
         childObj.move();
