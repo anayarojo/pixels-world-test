@@ -1,13 +1,8 @@
 $(document).ready(function(){
 
-    var world = new World();
+    let utility = new Utility();
+    let world = new World();
+    
     world.init();
-
-    setInterval(function()
-    {
-        world.update();
-        world.render();
-
-    }, 1000);
 
 });

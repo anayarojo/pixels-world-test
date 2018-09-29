@@ -1,87 +1,96 @@
  var World = (function(){
 
+    let _canvas = null; 
+    let _context = null; 
+    let _origin = {};
+    let _pixels = [];
+
     let obj = {};
-    let canvas = null; 
-    let context = null; 
-    let origin = {};
-    let items = [];
 
     obj.init = function()
     {
-        canvas = document.getElementById('world');
-        context = canvas.getContext('2d');
+        _canvas = document.getElementById('world');
+        _context = _canvas.getContext('2d');
 
         origin = {
-            x: Math.floor(canvas.width/2),
-            y: Math.floor(canvas.height/2),
+            x: Math.floor(_canvas.width/2),
+            y: Math.floor(_canvas.height/2),
         }
 
-        // canvas.setAttribute('width', window.innerWidth);
-        // canvas.setAttribute('height', window.innerHeight);
-        
-        context.fillStyle = "#f1f1f1";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        _context.fillStyle = "#f1f1f1";
+        _context.fillRect(0, 0, _canvas.width, _canvas.height);
+
+        setInterval(function()
+        {
+            obj.update(obj.render());
+
+        }, 100);
     }
 
-    obj.update = function()
+    obj.update = function(callback)
     {
-        if(items.length > 0)
+        if(_pixels.length > 0)
         {
-            for(let i = 0; i < items.length; i++)
+            for(let i = 0; i < _pixels.length; i++)
             {
-                // if(items.length < 10)
-                // {
-                //     items.push(new Entity());
-                // }
-
-                // items[i].move();
-
-                if(items[i].age % 10 == 0 && items.length < 10)
+                if(_pixels[i].getAge() % 10 == 0 && _pixels.length < 10)
                 {
-                    items.push(items[i].reproduce());
+                    _pixels.push(_pixels[i].reproduce());
                 }
                 else
                 {
-                    items[i].move();
+                    _pixels[i].move();
+                    _pixels[i].grow();
                 }
             }
         }
         else
         {
-            items.push(new Entity());
+            let pixel = new Pixel();
+            pixel.born({
+                world: obj,
+            });
+            _pixels.push(pixel);
         }
-
-        console.log("Update:");
-        console.log(items);
+        
+        if(callback) callback();
     }
 
-    obj.render = function()
+    obj.render = function(callback)
     {
-        if(items.length > 0)
+        if(_pixels.length > 0)
         {
-            console.log("Render:");
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            _context.clearRect(0, 0, _canvas.width, _canvas.height);
 
-            for(let i = 0; i<items.length; i++)
+            for(let i = 0; i<_pixels.length; i++)
             {
-                var rectangle = new Path2D();
+                let rectangle = new Path2D();
 
-                var size = items[i].size;
-                var color = items[i].color;
-                var position = items[i].position;
+                let size = _pixels[i].getSize();
+                let color = _pixels[i].getColor();
+                let position = _pixels[i].getPosition();
 
-                var x = Math.floor(origin.x + position.x - size/2);
-                var y = Math.floor(origin.y + position.y - size/2);
+                let x = Math.floor(origin.x + position.x - size/2);
+                let y = Math.floor(origin.y + position.y - size/2);
 
-                console.log(`Item: ${i}; x: ${x}; y: ${y}; size: ${size}`);
-                
-                context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
-                context.fillRect(x, y, size, size);
-
-                // rectangle.rect(x, y, size, size);
-                // context.fill(rectangle);
+                _context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+                _context.fillRect(x, y, size, size);
             }
         }
+
+        if(callback) callback();
+    }
+
+    obj.setOrigin = function(origin){
+        _origin = origin;
+    }
+
+    obj.getOrigin = function(){
+        return _origin;
+    }
+
+    obj.getPixels = function(){
+        return _pixels;
     }
 
     return obj;
