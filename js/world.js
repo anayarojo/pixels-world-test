@@ -11,17 +11,36 @@
     {
         _canvas = document.getElementById('world');
         _context = _canvas.getContext('2d');
-
-        origin = {
-            x: Math.floor(_canvas.width/2),
-            y: Math.floor(_canvas.height/2),
-        }
-
+ 
         _context.fillStyle = "#f1f1f1";
         _context.fillRect(0, 0, _canvas.width, _canvas.height);
 
-        setInterval(function()
-        {
+        _canvas.setAttribute('width', window.innerWidth);
+        _canvas.setAttribute('height', window.innerHeight);
+
+        origin = {
+            x: Math.floor(_canvas.width/2),
+            y: Math.floor(_canvas.height/2)
+        }
+
+        window.addEventListener('resize', function(event){
+
+            console.log(`x: ${event.currentTarget.innerWidth} y: ${event.currentTarget.innerHeight}`);
+
+            _canvas.setAttribute('width', event.currentTarget.innerWidth);
+            _canvas.setAttribute('height', event.currentTarget.innerHeight);
+
+            origin = {
+                x: Math.floor(_canvas.width/2),
+                y: Math.floor(_canvas.height/2),
+            }
+
+            obj.render();
+
+        });
+
+        setInterval(function() {
+
             obj.update(obj.render());
 
         }, 100);
@@ -33,9 +52,10 @@
         {
             for(let i = 0; i < _pixels.length; i++)
             {
-                if(_pixels[i].getAge() % 10 == 0 && _pixels.length < 10)
+                if(_pixels[i].getAge() % 10 == 0 && /*_pixels.length < 10000*/ _pixels.filter((x) => x.isAlive()).length < 100)
                 {
                     _pixels.push(_pixels[i].reproduce());
+                    _pixels[i].move();
                 }
                 else
                 {
@@ -52,6 +72,34 @@
             });
             _pixels.push(pixel);
         }
+
+        /*
+        for(pixel in _pixels.filter((x) => x.isAlive() && x.getAge() > 110))
+        {   
+            var index = _pixels.indexOf(pixel);
+            if(index != -1)
+            {
+                _pixels.pop(pixel);
+            }
+        }
+        */
+
+        /*
+        if(_pixels.length < 100)
+        {  
+            let pixel = new Pixel();
+            pixel.born({
+                world: obj,
+            });
+            _pixels.push(pixel);
+        }
+
+        for(let i = 0; i < _pixels.length; i++)
+        {
+            _pixels[i].move();
+            _pixels[i].grow();
+        }
+        */
         
         if(callback) callback();
     }
@@ -70,8 +118,8 @@
                 let color = _pixels[i].getColor();
                 let position = _pixels[i].getPosition();
 
-                let x = Math.floor(origin.x + position.x - size/2);
-                let y = Math.floor(origin.y + position.y - size/2);
+                let x = Math.floor(origin.x + (position.x * size) - size / 2);
+                let y = Math.floor(origin.y + (position.y * size) - size / 2);
 
                 _context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
                 _context.fillRect(x, y, size, size);

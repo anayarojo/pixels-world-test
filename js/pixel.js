@@ -27,19 +27,20 @@ var Pixel = (function(){
     {
         _index = props.world ? props.world.getPixels().length + 1 : 1;
         _age = props.age ? props.age : 0;
-        _generation = props.parent ? props.parent.getGeneration() : 1;
+        _generation = props.parent ? props.parent.getGeneration() + 1 : 1;
         _size = props.size ? props.size : 2;
         _alive = props.alive ? props.alive : true;
 
         _color = props.color ? 
-                 props.color : props.parent ?  
-                 parent.getGeneration() % 10 != 0 ? 
-                 parent.getColor() : obj.getRandomColor() : 
-                 obj.getRandomColor();
+                 Object.assign({}, props.color) : props.parent ?  
+                 props.parent.getGeneration() % 5 != 0 ? 
+                 Object.assign({}, props.parent.getColor()) : Object.assign({}, obj.getRandomColor()) : 
+                 Object.assign({}, obj.getRandomColor());
+                 
 
         _position = props.position ? 
                     props.position : props.parent ? 
-                    props.parent.getPosition() : {x:0, y:0};
+                    Object.assign({}, props.parent.getPosition()) : {x:0, y:0};
 
         _world = props.world ? props.world : null;
         _parent = props.parent ? props.parent : null;
@@ -53,82 +54,101 @@ var Pixel = (function(){
             case 0:
             case 1:
             case 2:
+                _size = 2;
+                break;
             case 3:
             case 4:
+                _size = 4;
+                break;
             case 5:
-                _size = 2;
-            break;
             case 6:
+                _size = 6;
+                break;
             case 7:
             case 8:
+                _size = 8;
+                break;
             case 9:
             case 10:
-                _size = 4;
+                _size = 10;
             break;
             default:
-                _size = 6;
+                _size = 10;
             break;
         }
     }
 
     obj.move = function()
     {
-        switch(obj.getRandom(9))
+        if(_age < 100)
         {
-            case 1:
-                _position.x--;
-                _position.y++;
-            break;
-            case 2:
-                _position.y++;
-            break;
-            case 3:
-                _position.x++;
-                _position.y++;
-            break;
-            case 4:
-                _position.x--;
-            break;
-            case 5:
-                //nothing
-            break;
-            case 6:
-                _position.x++;
-            break;
-            case 7:
-                _position.x--;
-                _position.y--;
-            break;
-            case 8:
-                _position.y--;
-            break;
-            case 9:
-                _position.x++;
-                _position.y--;
-            break;
+            switch(obj.getRandom(9))
+            {
+                case 1:
+                    _position.x--;
+                    _position.y++;
+                break;
+                case 2:
+                    _position.y++;
+                break;
+                case 3:
+                    _position.x++;
+                    _position.y++;
+                break;
+                case 4:
+                    _position.x--;
+                break;
+                case 5:
+                    //nothing
+                break;
+                case 6:
+                    _position.x++;
+                break;
+                case 7:
+                    _position.x--;
+                    _position.y--;
+                break;
+                case 8:
+                    _position.y--;
+                break;
+                case 9:
+                    _position.x++;
+                    _position.y--;
+                break;
+            }
         }
-
+        else
+        {
+            obj.die();
+        }
         _age++;
     }
 
     obj.reproduce = function()
     {
         let child = new Pixel();
-
-        child.born({
-            world: _world, 
-            parent: _parent, 
-            position: _position 
-        });
+        child.born({world: _world, parent: obj});
+        child.move();
 
         _children.push(child);
-
         return child;
     }
 
     obj.die = function()
     {
         _alive = false;
+        _color = {r: 241, g: 241, b: 241};
+
+        /*
+        if(_age > 200)
+        {
+            _color = {r: 0, g: 0, b: 0};
+        }
+        else
+        {
+            _color = {r: 241, g: 241, b: 241};
+        }
+        */
     }
 
     // Utilities
